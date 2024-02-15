@@ -12,7 +12,7 @@ import { commonFieldValidator } from "../Validator/validation.mjs";
 import {
   signInValidationRules,
   signUpValidationRules,
-} from "../util/constants.mjs";
+} from "../Validator/validation.mjs";
 import {
   authenticateJWT,
   authorizeAdmin,

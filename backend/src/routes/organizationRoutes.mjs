@@ -3,16 +3,37 @@ import {
   authenticateJWT,
   authorizeAdmin,
 } from "../middlewares/authmiddleware.mjs";
-import { organizationFormValidation } from "../util/constants.mjs";
-import { commonFieldValidator } from "../Validator/validation.mjs";
+import {
+  commonFieldValidator,
+  organizationFormValidation,
+} from "../Validator/validation.mjs";
 import {
   createOrganization,
+  deleteOrganizationById,
+  fetchAllOrganization,
+  getAllData,
   getOrganizationById,
+  updateOrganizationById,
 } from "../controllers/organizationController.mjs";
 
-const origanizationRoutes = express.Router();
+const organizationRoutes = express.Router();
 
-origanizationRoutes
+organizationRoutes
+  .route("/getAllData")
+  .get(authenticateJWT, authorizeAdmin, getAllData);
+
+organizationRoutes
+  .route("/listAllOrganizations")
+  .get(authenticateJWT, authorizeAdmin, async (req, res) => {
+    try {
+      const organizations = await fetchAllOrganization();
+      return res.json(organizations);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+organizationRoutes
   .route("/create")
   .post(
     authenticateJWT,
@@ -22,7 +43,10 @@ origanizationRoutes
     createOrganization
   );
 
-origanizationRoutes.route("/:id").get(authenticateJWT, getOrganizationById);
-//   .put(authenticateJWT, updateCurrentUserProfile);
+organizationRoutes
+  .route("/:id")
+  .get(authenticateJWT, authorizeAdmin, getOrganizationById)
+  .put(authenticateJWT, authorizeAdmin, updateOrganizationById)
+  .delete(authenticateJWT, authorizeAdmin, deleteOrganizationById);
 
-export default origanizationRoutes;
+export default organizationRoutes;

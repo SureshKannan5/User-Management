@@ -33,9 +33,7 @@ const createUser = asyncHandler(async (req, res) => {
 
     res.status(201).json({ token });
   } catch (error) {
-    res.status(400);
-    console.log(error);
-    throw new Error("Invalid user data");
+    res.status(404).json({ message: "Invalid User Data" });
   }
 });
 
@@ -88,7 +86,7 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(404);
-    throw new Error("User not found.");
+    res.status(404).json({ message: "User not found" });
   }
 });
 
@@ -124,8 +122,7 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
       organization: organization.name,
     });
   } else {
-    res.status(404);
-    throw new Error("User not found");
+    res.status(404).json({ message: "User not found" });
   }
 });
 
@@ -142,7 +139,7 @@ const deleteUserById = asyncHandler(async (req, res) => {
     res.json({ message: "User removed" });
   } else {
     res.status(404);
-    throw new Error("User not found.");
+    res.status(404).json({ message: "User not found" });
   }
 });
 
@@ -154,16 +151,13 @@ const getUserById = asyncHandler(async (req, res) => {
   if (user) {
     res.json(user);
   } else {
-    res.status(404);
-    throw new Error("User not found");
+    res.status(404).json({ message: "User not found" });
   }
 });
 
 const updateUserById = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-
-    console.log(user);
 
     if (user) {
       user.firstName = req.body.firstName || user.firstName;
@@ -178,17 +172,13 @@ const updateUserById = asyncHandler(async (req, res) => {
         user.password = hashedPassword;
       }
 
-      console.log("coiming into user", user);
-
       const updatedUser = await user.save();
 
       const response = await updatedUser.populate("organization");
-      console.log("coiming into user", response);
 
       res.json(response);
     } else {
-      res.status(404);
-      throw new Error("User not found");
+      res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
     throw new Error(error);

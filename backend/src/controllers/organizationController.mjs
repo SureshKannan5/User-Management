@@ -1,10 +1,11 @@
 import asyncHandler from "../middlewares/asyncHandlers.mjs";
 import Organization from "../models/organizationModel.mjs";
+import User from "../models/userModel.mjs";
 
 const createOrganization = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  const companyExisits = await Organization.findOne({ email });
+  const companyExisits = await Organization.findOne({ email }).exec();
 
   if (companyExisits)
     return res
@@ -25,14 +26,99 @@ const createOrganization = asyncHandler(async (req, res) => {
 });
 
 const getOrganizationById = asyncHandler(async (req, res) => {
-  const organization = await Organization.findById(req.params.id);
+  const organization = await Organization.findById(req.params.id).exec();
 
   if (organization) {
     res.json(organization);
   } else {
-    res.status(404);
-    throw new Error("Organization not found");
+    res.status(404).json({ message: "Organization not found." });
   }
 });
 
-export { createOrganization, getOrganizationById };
+const updateOrganizationById = asyncHandler(async (req, res) => {
+  try {
+    const organization = await Organization.findById(req.params.id).exec();
+
+    if (organization) {
+      organization.name = req.body.name || organization.name;
+      organization.website = req.body.website || organization.website;
+      organization.email = req.body.email || organization.email;
+      organization.description =
+        req.body.description || organization.description;
+
+      const response = await organization.save();
+
+      res.json(response);
+    } else {
+      res.status(404).json({ message: "Organization not found." });
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+const deleteOrganizationById = asyncHandler(async (req, res) => {
+  const organization = await Organization.findById(req.params.id).exec();
+
+  if (organization) {
+    await organization.deleteOne({ _id: organization._id });
+    res.json({ message: "Organization removed" });
+  } else {
+    res.status(404).json({ message: "Organization not found." });
+  }
+});
+
+const getAllData = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find({})
+      .select("-password")
+      .populate(["role", "organization"])
+      .exec();
+
+    const organizations = await fetchAllOrganization();
+
+    console.log(organizations);
+
+    return res.json({ users, organizations });
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+});
+
+const fetchAllOrganization = async (req, res) => {
+  try {
+    const organizations = await Organization.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "organization",
+          as: "users",
+        },
+      },
+      {
+        $addFields: {
+          userCount: { $size: "$users" },
+        },
+      },
+      {
+        $project: {
+          users: 0,
+        },
+      },
+    ]);
+    return organizations;
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+};
+export {
+  createOrganization,
+  getOrganizationById,
+  updateOrganizationById,
+  deleteOrganizationById,
+  getAllData,
+  fetchAllOrganization,
+};

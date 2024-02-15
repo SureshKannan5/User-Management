@@ -15,8 +15,6 @@ passport.use(
         "organization",
       ]);
 
-      console.log("user", user);
-
       if (!user) {
         return done("user is not exist", false);
       }
