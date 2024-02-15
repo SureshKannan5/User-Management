@@ -14,4 +14,9 @@ export const signInValidationRules = [
   body("password").notEmpty(),
 ];
 
+export const organizationFormValidation = [
+  body("name").notEmpty(),
+  body("website").isURL(),
+  body("email").isEmail(),
+];
 export const BASE_API_URL = "/api/v1";

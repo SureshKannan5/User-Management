@@ -3,13 +3,20 @@ import {
   createUser,
   getCurrentUserProfile,
   loginUser,
+  updateCurrentUserProfile,
+  getUserById,
+  deleteUserById,
+  updateUserById,
 } from "../controllers/userController.mjs";
 import { commonFieldValidator } from "../Validator/validation.mjs";
 import {
   signInValidationRules,
   signUpValidationRules,
 } from "../util/constants.mjs";
-import { authenticateJWT } from "../middlewares/authmiddleware.mjs";
+import {
+  authenticateJWT,
+  authorizeAdmin,
+} from "../middlewares/authmiddleware.mjs";
 
 const userRoutes = express.Router();
 
@@ -21,6 +28,17 @@ userRoutes
   .route("/auth")
   .post(signInValidationRules, commonFieldValidator, loginUser);
 
-userRoutes.route("/profile").get(authenticateJWT, getCurrentUserProfile);
+userRoutes
+  .route("/profile")
+  .get(authenticateJWT, getCurrentUserProfile)
+  .put(authenticateJWT, updateCurrentUserProfile);
+
+// ADMIN ROUTES
+
+userRoutes
+  .route("/:id")
+  .delete(authenticateJWT, authorizeAdmin, deleteUserById)
+  .get(authenticateJWT, authorizeAdmin, getUserById)
+  .put(authenticateJWT, authorizeAdmin, updateUserById);
 
 export default userRoutes;

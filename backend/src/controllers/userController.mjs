@@ -3,12 +3,11 @@ import User from "../models/userModel.mjs";
 import bcrypt from "bcrypt";
 import { generateToken } from "../util/helpers.mjs";
 import Role from "../models/roleSchema.mjs";
-import Organization from "../models/organizationModel.mjs";
 
 const createUser = asyncHandler(async (req, res) => {
   const { email, password, role } = req.body;
 
-  const userExisits = await User.findOne({ email }).exec();
+  const userExisits = await User.findOne({ email });
 
   if (userExisits)
     return res
@@ -17,14 +16,14 @@ const createUser = asyncHandler(async (req, res) => {
 
   const salt = await bcrypt.genSalt(10);
 
-  const hashPassword = await bycrypt.hash(password, salt);
+  const hashPassword = await bcrypt.hash(password, salt);
 
   const userInstance = new User({ ...req.body, password: hashPassword });
 
   try {
     await userInstance.save();
 
-    const roleInstance = await Role.findById(role).exec();
+    const roleInstance = await Role.findById(role);
     const token = generateToken({
       sub: userInstance._id,
       userName: userInstance.fullName,
@@ -44,9 +43,9 @@ const loginUser = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const existingUser = await User.findOne({ email }).exec();
+    const existingUser = await User.findOne({ email });
 
-    const roleInstance = await Role.findById(existingUser.role).exec();
+    const roleInstance = await Role.findById(existingUser.role);
 
     if (existingUser) {
       const isPasswordValid = await bcrypt.compare(
@@ -62,7 +61,9 @@ const loginUser = asyncHandler(async (req, res) => {
           access: roleInstance.privileges,
         });
 
-        return res.status(200).json({ token });
+        return res.json({ token });
+      } else {
+        res.status(401).json({ message: "Invalid password" });
       }
     }
   } catch (error) {
@@ -75,26 +76,131 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
 
   const user = await User.findById(userInfo._id);
 
-  const { _id, firstName, lastName, email, role, organization } = user;
-
-  const roleInstance = await Role.findById(role);
-
-  const organizationInstance = await Organization.findById(organization);
-
-  if (user) {
-    return res
-      .json({
-        firstName,
-        lastName,
-        email,
-        role: roleInstance.name,
-        organization: organizationInstance.name,
-      })
-      .status(200);
+  if (userInfo) {
+    const { role, organization } = userInfo;
+    return res.json({
+      _id: userInfo._id,
+      firstName: userInfo.firstName,
+      lastName: userInfo.lastName,
+      email: userInfo.email,
+      role: role.name,
+      organization: organization.name,
+    });
   } else {
     res.status(404);
     throw new Error("User not found.");
   }
 });
 
-export { createUser, loginUser, getCurrentUserProfile };
+const updateCurrentUserProfile = asyncHandler(async (req, res) => {
+  const userInfo = await req.user;
+
+  const user = await User.findById(userInfo._id).populate([
+    "role",
+    "organization",
+  ]);
+
+  if (user) {
+    user.firstName = req.body.firstName || user.firstName;
+    user.lastName = req.body.lastName || user.lastName;
+    user.email = req.body.email || user.email;
+
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      user.password = hashedPassword;
+    }
+
+    const updatedUser = await user.save();
+
+    const { _id, firstName, lastName, email, role, organization } = updatedUser;
+
+    res.json({
+      _id,
+      firstName,
+      lastName,
+      email,
+      role: role.name,
+      organization: organization.name,
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
+
+const deleteUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).populate("role");
+
+  if (user) {
+    if (user.role.name === "admin") {
+      res.status(400);
+      throw new Error("Cannot delete admin user");
+    }
+
+    await User.deleteOne({ _id: user._id });
+    res.json({ message: "User removed" });
+  } else {
+    res.status(404);
+    throw new Error("User not found.");
+  }
+});
+
+const getUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id)
+    .select("-password")
+    .populate(["role", "organization"]);
+
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
+
+const updateUserById = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    console.log(user);
+
+    if (user) {
+      user.firstName = req.body.firstName || user.firstName;
+      user.lastName = req.body.lastName || user.lastName;
+      user.email = req.body.email || user.email;
+      user.role = req.body.role || user.role;
+      user.organization = req.body.organization || user.organization;
+
+      if (req.body.password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        user.password = hashedPassword;
+      }
+
+      console.log("coiming into user", user);
+
+      const updatedUser = await user.save();
+
+      const response = await updatedUser.populate("organization");
+      console.log("coiming into user", response);
+
+      res.json(response);
+    } else {
+      res.status(404);
+      throw new Error("User not found");
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+export {
+  createUser,
+  loginUser,
+  getCurrentUserProfile,
+  updateCurrentUserProfile,
+  getUserById,
+  updateUserById,
+  deleteUserById,
+};

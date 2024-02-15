@@ -4,6 +4,7 @@ import userRoutes from "./src/routes/userRoutes.mjs";
 import express from "express";
 import { BASE_API_URL } from "./src/util/constants.mjs";
 import passport from "./src/config/passportConfig.mjs";
+import origanizationRoutes from "./src/routes/organizationRoutes.mjs";
 
 dotenv.config();
 
@@ -20,5 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 app.use(`${BASE_API_URL}/user`, userRoutes);
+
+app.use(`${BASE_API_URL}/admin/organization`, origanizationRoutes);
 
 app.listen(port, () => console.log(`Server running on port: ${port}`));

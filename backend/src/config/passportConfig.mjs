@@ -10,7 +10,12 @@ const jwtOptions = {
 passport.use(
   new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
     try {
-      const user = User.findById(jwt_payload.sub).exec();
+      const user = await User.findById(jwt_payload.sub).populate([
+        "role",
+        "organization",
+      ]);
+
+      console.log("user", user);
 
       if (!user) {
         return done("user is not exist", false);
@@ -18,7 +23,8 @@ passport.use(
 
       return done(null, user);
     } catch (error) {
-      return done("User is not authorized", false);
+      console.log(error);
+      return done("Internal server error", false);
     }
   })
 );

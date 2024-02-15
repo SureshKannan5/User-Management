@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const organizationSchema = new Schema(
   {
@@ -9,7 +9,7 @@ const organizationSchema = new Schema(
       required: true,
       unique: true,
     },
-    description: String,
+    description: { type: String },
     website: { type: String, required: true, unique: true },
     email: {
       type: String,
