@@ -1,6 +1,6 @@
 import { validationResult } from "express-validator";
 
-export const signUpValidator = (req, res, next) => {
+export const commonFieldValidator = (req, res, next) => {
   const errors = validationResult(req);
 
   if (errors.isEmpty()) {
