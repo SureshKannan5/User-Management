@@ -1,8 +1,8 @@
-import asyncHandler from "../src/middlewares/asyncHandlers.js";
 import Role from "../src/models/roleSchema.mjs";
 import connectDB from "../src/config/db.mjs";
 import dotenv from "dotenv";
 import Organization from "../src/models/organizationModel.mjs";
+import { faker } from "@faker-js/faker";
 
 const createRoles = async () => {
   console.log("Role Creation in progress...");
@@ -42,17 +42,24 @@ const seedOrganizations = async () => {
     const collectionExists = await Organization.exists();
 
     if (collectionExists) {
-      // Clear existing roles
-      await Role.deleteMany();
+      // Clear existing organization
+      await Organization.deleteMany();
     }
 
-    // add new roles
+    // add new origanization data
 
-    await Role.insertMany(roleArray);
+    const dummyOrganizationRecords = Array.from({ length: 10 }, () => ({
+      name: faker.company.name(),
+      description: faker.company.catchPhrase(),
+      website: faker.internet.url(),
+      email: faker.internet.email(),
+    }));
 
-    console.log("Role Creation Completed 👍");
+    await Organization.insertMany(dummyOrganizationRecords);
+
+    console.log("Organization data's seeded 👍");
   } catch (error) {
-    console.log("Role Creation failed ❌");
+    console.log("organization creation failed ❌");
   }
 };
 
@@ -61,7 +68,8 @@ const setup = async () => {
   dotenv.config();
   try {
     await connectDB();
-    await createRoles();
+    await Promise.all([createRoles(), seedOrganizations()]);
+
     process.exit();
   } catch (error) {
     console.log("setup failed");
