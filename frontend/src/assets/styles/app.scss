@@ -1,4 +1,6 @@
-@import "../../../node_modules/bootstrap/dist/css/bootstrap.css";
+@import "./variable";
+@import "./font";
+@import "./componets.scss";
 
 .centerAbsolute {
     position: absolute;
@@ -8,4 +10,20 @@
     height: 38px;
     margin-left: -16px;
     margin-top: -19px;
+}
+
+
+* {
+    font-family: Nunito, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 700
+}
+
+body {
+    font-family: apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    background-color: $grey-200;
+}
+
+.login-form-button {
+    width: 100%;
 }
