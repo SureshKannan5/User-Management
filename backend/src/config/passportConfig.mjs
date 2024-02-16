@@ -16,7 +16,7 @@ passport.use(
       ]);
 
       if (!user) {
-        return done("user is not exist", false);
+        return done("Invalid token", false);
       }
 
       return done(null, user);
