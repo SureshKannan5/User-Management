@@ -27,12 +27,14 @@ const DataTable = ({ columns, dataSource, actions }) => {
   ];
 
   const convertedItems = useMemo(() => {
-    if (actions.onEdit && actions.onDelete) {
+    if (actions?.onEdit && actions?.onDelete) {
       return items;
     } else {
-      items[0];
+      return [items[0]];
     }
   }, [actions]);
+
+  console.log("con", convertedItems);
 
   const convertedColumns = useMemo(
     () => [

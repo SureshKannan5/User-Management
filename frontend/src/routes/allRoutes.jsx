@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
+import AccessDenied from "../app/components/AccessDenied";
 
 // Auth Pages
 
@@ -20,14 +21,13 @@ export const publicRoutes = [
     path: "/login",
     component: <Login />,
   },
+  {
+    path: "/access-denied",
+    component: <AccessDenied />,
+  },
 ];
 
 export const authProtectedRoutes = [
-  {
-    path: "*",
-    component: <Navigate to="/organizations" />,
-  },
-  { path: "/", component: <HomePage /> },
-  { path: "/organizations", component: <HomePage /> },
-  { path: "/users-view", component: <UsersView /> },
+  { path: "/organizations", component: <HomePage />, roles: ["admin"] },
+  { path: "/users-view", component: <UsersView />, roles: ["admin", "user"] },
 ];

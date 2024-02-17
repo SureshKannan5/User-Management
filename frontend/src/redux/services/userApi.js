@@ -12,8 +12,32 @@ export const userApi = api.injectEndpoints({
     listAllUsers: build.query({
       query: () => `${MODULE_BASE_URL}/listAllUsers`,
     }),
+    getUserProfile: build.query({
+      query: () => `${MODULE_BASE_URL}/profile`,
+    }),
+    updateCurrentUser: build.mutation({
+      query: (payload) => ({
+        url: `${MODULE_BASE_URL}/profile`,
+        method: "PUT",
+        body: payload,
+      }),
+    }),
     getUserById: build.query({
       query: (id) => `${MODULE_BASE_URL}/${id}`,
+    }),
+    updateUserById: build.mutation({
+      query: ({ payload, id }) => ({
+        url: `${MODULE_BASE_URL}/${id}`,
+        method: "PUT",
+        body: payload,
+      }),
+    }),
+    deleteUserById: build.mutation({
+      query: ({ payload, id }) => ({
+        url: `${MODULE_BASE_URL}/${id}`,
+        method: "PUT",
+        body: payload,
+      }),
     }),
   }),
   overrideExisting: true,
@@ -22,5 +46,10 @@ export const userApi = api.injectEndpoints({
 export const {
   useListMetaOrganizationsQuery,
   useListAllUsersQuery,
+  useLazyGetUserProfileQuery,
+  useUpdateCurrentUserMutation,
+  useLazyListAllUsersQuery,
   useLazyGetUserByIdQuery,
+  useUpdateUserByIdMutation,
+  useDeleteUserByIdMutation,
 } = userApi;

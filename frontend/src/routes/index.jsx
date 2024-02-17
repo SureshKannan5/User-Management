@@ -1,24 +1,27 @@
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
-import { publicRoutes, authProtectedRoutes } from "./allRoutes";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { authProtectedRoutes, publicRoutes } from "./allRoutes";
 import PrivateRoute from "./PrivateRoute";
 
-const MainRouteDriver = createBrowserRouter(
-  createRoutesFromElements(
-    <>
-      {publicRoutes.map((route) => (
-        <Route path={route.path} element={route.component} key={route.path} />
-      ))}
-      <Route path="/" element={<PrivateRoute />}>
-        {authProtectedRoutes.map((route) => (
+const Index = () => {
+  return (
+    <React.Fragment>
+      <Routes>
+        {publicRoutes.map((route) => (
           <Route path={route.path} element={route.component} key={route.path} />
         ))}
-      </Route>
-    </>
-  )
-);
+        <Route path="/" element={<PrivateRoute />}>
+          {authProtectedRoutes.map((route) => (
+            <Route
+              path={route.path}
+              element={route.component}
+              key={route.name}
+            />
+          ))}
+        </Route>
+      </Routes>
+    </React.Fragment>
+  );
+};
 
-export default MainRouteDriver;
+export default Index;

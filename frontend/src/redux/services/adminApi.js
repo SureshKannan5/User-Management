@@ -21,8 +21,12 @@ export const adminApi = api.injectEndpoints({
     getOrgnizationById: build.query({
       query: (id) => `${MODULE_BASE_URL}/${id}`,
     }),
-    listOrganization: build.query({
-      query: () => `${MODULE_BASE_URL}/listAllOrganizations`,
+    listOrganization: build.mutation({
+      query: (payload) => ({
+        url: `${MODULE_BASE_URL}/listAllOrganizations`,
+        method: "POST",
+        body: payload,
+      }),
     }),
     listRoles: build.query({
       query: () => `${MODULE_BASE_URL}/listRoles`,
@@ -61,7 +65,7 @@ export const adminApi = api.injectEndpoints({
 });
 
 export const {
-  useListOrganizationQuery,
+  useListOrganizationMutation,
   useRegisterUserMutation,
   useListRolesQuery,
   useListAllDataQuery,

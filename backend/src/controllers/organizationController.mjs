@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import asyncHandler from "../middlewares/asyncHandlers.mjs";
 import Organization from "../models/organizationModel.mjs";
 import Role from "../models/roleSchema.mjs";
@@ -106,9 +107,11 @@ const fetchOrganizationMeta = asyncHandler(async (req, res) => {
   }
 });
 
-const fetchAllOrganization = async (req, res) => {
+const fetchAllOrganization = async (filterValues) => {
+  const { organization } = filterValues;
+
   try {
-    const organizations = await Organization.aggregate([
+    const aggregatedQuery = [
       {
         $lookup: {
           from: "users",
@@ -127,7 +130,18 @@ const fetchAllOrganization = async (req, res) => {
           users: 0,
         },
       },
-    ]);
+    ];
+
+    if (organization?.length > 0) {
+      let newId = organization.map((id) => new mongoose.Types.ObjectId(id));
+      aggregatedQuery.push({
+        $match: {
+          _id: { $in: newId },
+        },
+      });
+    }
+    const organizations = await Organization.aggregate(aggregatedQuery);
+
     return organizations;
   } catch (error) {
     console.log(error);

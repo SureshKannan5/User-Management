@@ -9,17 +9,21 @@ import {
   useUpdateUserByIdMutation,
 } from "../../redux/services/adminApi";
 import { labelFormatter, pageNotifications } from "../util/helpers";
-import { isEmpty } from "lodash";
 import { useEffect } from "react";
-import { useLazyGetUserByIdQuery } from "../../redux/services/userApi";
+import {
+  useLazyGetUserByIdQuery,
+  useUpdateCurrentUserMutation,
+} from "../../redux/services/userApi";
+import { useSelector } from "react-redux";
 
 const CustomOffCanVas = ({
   isOpen,
   title,
   onClose,
-  selectedRowId,
+  selectedRow,
   action,
   setSelectedRow,
+  setLoadPage,
 }) => {
   const [createOrganization] = useCreateOrganizationMutation();
 
@@ -33,9 +37,13 @@ const CustomOffCanVas = ({
 
   const [updateOrganizationInfo] = useUpdateOrganizationByIdMutation();
 
+  const [updateCurrentUser] = useUpdateCurrentUserMutation();
+
   const [form] = Form.useForm();
 
   const { data } = useListRolesQuery();
+
+  const { role } = useSelector((state) => state.auth.userInfo);
 
   const roleOptions = labelFormatter(data, "name", "_id");
 
@@ -43,20 +51,26 @@ const CustomOffCanVas = ({
 
   const onCloseDrawer = () => {
     form.resetFields();
-    setSelectedRow(null);
-
+    setSelectedRow(() => null);
     onClose();
   };
 
+  console.log("select", selectedRow);
+
   useEffect(() => {
     async function getDataById() {
-      if (selectedRowId) {
+      if (role === "user") {
+        form.setFieldsValue(selectedRow);
+        return;
+      }
+      if (selectedRow?._id) {
+        const { _id } = selectedRow;
         try {
           if (isOrganizationAction) {
-            const result = await getOrganizationInfo(selectedRowId).unwrap();
+            const result = await getOrganizationInfo(_id).unwrap();
             form.setFieldsValue(result);
           } else {
-            const result = await getUserInfo(selectedRowId).unwrap();
+            const result = await getUserInfo(_id).unwrap();
             form.setFieldsValue(result);
             form.setFieldValue("organization", result.organization._id);
             form.setFieldValue("role", result.role._id);
@@ -68,16 +82,14 @@ const CustomOffCanVas = ({
     }
 
     getDataById();
-  }, [selectedRowId]);
+  }, [selectedRow]);
 
   const onSubmit = async (values) => {
-    const adminObject =
-      !isEmpty(data) && data.find((role) => role.name === "admin");
     try {
       if (action === "create") {
         if (isOrganizationAction) await createOrganization(values).unwrap();
         else {
-          await createUser({ ...values, role: adminObject._id }).unwrap();
+          await createUser(values).unwrap();
         }
 
         pageNotifications.success(
@@ -89,9 +101,7 @@ const CustomOffCanVas = ({
       }
 
       onUpdateInfo(values);
-
-      form.resetFields();
-      onClose();
+      onCloseDrawer();
     } catch (error) {
       pageNotifications.error(error.data);
       console.log(error);
@@ -100,17 +110,20 @@ const CustomOffCanVas = ({
 
   const onUpdateInfo = async (values) => {
     try {
-      console.log(selectedRowId, values);
       if (isOrganizationAction)
         await updateOrganizationInfo({
           payload: values,
-          id: selectedRowId,
+          id: selectedRow._id,
         }).unwrap();
       else {
-        await updateUserInfo({
-          payload: values,
-          id: selectedRowId,
-        }).unwrap();
+        if (role === "user") {
+          await updateCurrentUser(values);
+        } else {
+          await updateUserInfo({
+            payload: values,
+            id: selectedRow._id,
+          }).unwrap();
+        }
       }
 
       pageNotifications.success(

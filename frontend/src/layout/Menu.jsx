@@ -1,26 +1,49 @@
-import { UserAddOutlined, ShopOutlined } from "@ant-design/icons";
+import { UserOutlined, ShopOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Menu, Layout } from "antd";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { logOut } from "../redux/slices/authSlice";
 
 const { Sider } = Layout;
 
-const items = [
-  {
-    key: "organizations",
-    icon: <ShopOutlined />,
-    label: <Link to={"/organizations"}>Organizations</Link>,
-  },
-  {
-    key: "users",
-    icon: <UserAddOutlined />,
-    label: <Link to={"/users-view"}>Users</Link>,
-  },
-];
 const SideBar = () => {
   const location = useLocation();
 
   const [currentPath, setCurrentPath] = useState(location.pathname.slice(1));
+
+  const { role } = useSelector((state) => state.auth.userInfo);
+
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
+  const logoutFromApp = () => {
+    dispatch(logOut());
+    navigate("/login");
+  };
+
+  const items = [
+    {
+      key: "organizations",
+      icon: <ShopOutlined />,
+      label: <Link to={"/organizations"}>Organizations</Link>,
+    },
+    {
+      key: "users-view",
+      icon: <UserOutlined />,
+      label: <Link to={"/users-view"}>Users</Link>,
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: (
+        <Link to={"#logout"} onClick={logoutFromApp}>
+          Log Out
+        </Link>
+      ),
+    },
+  ];
 
   useEffect(() => {
     if (location)
@@ -48,7 +71,7 @@ const SideBar = () => {
         theme={"light"}
       >
         <Menu
-          items={items}
+          items={role === "user" ? items.slice(1, 3) : items}
           mode="inline"
           theme={"light"}
           selectedKeys={[currentPath]}

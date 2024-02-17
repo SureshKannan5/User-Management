@@ -32,6 +32,7 @@ const authSlice = createSlice({
     },
     logOut: (state) => {
       sessionStorage.removeItem("auth-token");
+      sessionStorage.removeItem("currentUserRole");
       state.token = "";
       state.userInfo = userInitialState;
     },

@@ -1,10 +1,12 @@
 import DataTable from "../app/components/DataTable";
 import { Content } from "antd/es/layout/layout";
-import { Button, Typography } from "antd";
+import { Button, Space, Typography } from "antd";
 import { ShopOutlined } from "@ant-design/icons";
 import CustomOffCanVas from "../app/components/CustomOffCanVas";
-import { useState } from "react";
-import { useListOrganizationQuery } from "../redux/services/adminApi";
+import { useEffect, useState } from "react";
+import { useListOrganizationMutation } from "../redux/services/adminApi";
+import CustomSelect from "../app/components/CustomSelect";
+import { useListMetaOrganizationsQuery } from "../redux/services/userApi";
 
 const { Title } = Typography;
 
@@ -23,7 +25,15 @@ const HomePage = () => {
     setIsOpen(false);
   };
 
-  const { data: listOrganizations } = useListOrganizationQuery({});
+  const [getFilteredOrganizations, { data }] = useListOrganizationMutation();
+
+  const { data: organizationOptions } = useListMetaOrganizationsQuery({});
+
+  console.log(data);
+
+  useEffect(() => {
+    getFilteredOrganizations({ organization: [] });
+  }, []);
 
   const columns = [
     {
@@ -64,6 +74,10 @@ const HomePage = () => {
     setSelectedRow(() => record);
   };
 
+  const onSelectChange = (selectedValue) => {
+    getFilteredOrganizations({ organization: selectedValue });
+  };
+
   return (
     <>
       {isOpen && (
@@ -102,10 +116,21 @@ const HomePage = () => {
               </Button>
             </div>
           </div>
+          <CustomSelect
+            options={organizationOptions}
+            placeholder="Select organization"
+            onChange={onSelectChange}
+            mode="multiple"
+            allowClear
+            style={{
+              width: "50%",
+              marginBottom: "20px",
+            }}
+          />
 
           <DataTable
             columns={columns}
-            dataSource={listOrganizations}
+            dataSource={data || []}
             actions={{ onEdit: onEditRow, onDelete: onDeletedRow }}
           />
         </Content>

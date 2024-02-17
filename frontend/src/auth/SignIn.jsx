@@ -28,11 +28,14 @@ const SignIn = () => {
       sessionStorage.setItem("auth-token", token);
 
       const userInformation = generateUserInfo(token);
+      sessionStorage.setItem("currentUserRole", userInformation.role);
 
       dispatch(setUserAuthToken({ token }));
 
       dispatch(setUserInfo(userInfo, userInformation));
-      navigate("/");
+      navigate(
+        userInformation.role === "user" ? "/users-view" : "/organizations"
+      );
     } catch (error) {
       console.log(error);
     }

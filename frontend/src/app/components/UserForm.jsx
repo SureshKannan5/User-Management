@@ -2,15 +2,20 @@ import { Form, Input } from "antd";
 import CustomSelect from "./CustomSelect";
 import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useListMetaOrganizationsQuery } from "../../redux/services/userApi";
+import { useSelector } from "react-redux";
 
 const UserForm = ({ roleOptions, action }) => {
   const { data } = useListMetaOrganizationsQuery({});
 
   const [form] = Form.useForm();
 
+  const { role } = useSelector((state) => state.auth.userInfo);
+
   const onSelectChange = (value) => {
     form.setFieldValue(value);
   };
+
+  const isUpdateAction = action === "update";
 
   return (
     <div>
@@ -59,83 +64,82 @@ const UserForm = ({ roleOptions, action }) => {
           size="large"
         />
       </Form.Item>
+      {role !== "user" && (
+        <>
+          <Form.Item
+            label="Organization"
+            name={"organization"}
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <CustomSelect
+              options={data}
+              placeholder="Select organization"
+              onChange={onSelectChange}
+            />
+          </Form.Item>
+          {roleOptions && (
+            <Form.Item
+              label="Role"
+              name={"role"}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <CustomSelect
+                options={roleOptions}
+                placeholder="Select organization"
+                onChange={onSelectChange}
+              />
+            </Form.Item>
+          )}
+        </>
+      )}
+
       <Form.Item
-        label="Organization"
-        name={"organization"}
+        name="password"
+        label="Password"
         rules={[
           {
-            required: true,
+            required: isUpdateAction ? false : true,
           },
         ]}
       >
-        <CustomSelect
-          options={data}
-          placeholder="Select organization"
-          onChange={onSelectChange}
+        <Input.Password
+          prefix={<LockOutlined className="site-form-item-icon" />}
+          size="large"
         />
       </Form.Item>
-      {roleOptions && (
-        <Form.Item
-          label="Role"
-          name={"role"}
-          rules={[
-            {
-              required: true,
+      <Form.Item
+        name="conform password"
+        label={"Confirm Password"}
+        rules={[
+          {
+            required: isUpdateAction ? false : true,
+          },
+          ({ getFieldValue }) => ({
+            validator(_, value) {
+              if (!value || getFieldValue("password") === value) {
+                return Promise.resolve();
+              }
+              return Promise.reject(
+                new Error("The two passwords that you entered do not match!")
+              );
             },
-          ]}
-        >
-          <CustomSelect
-            options={roleOptions}
-            placeholder="Select organization"
-            onChange={onSelectChange}
-          />
-        </Form.Item>
-      )}
-      {action !== "update" && (
-        <>
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              size="large"
-            />
-          </Form.Item>
-          <Form.Item
-            name="conform password"
-            label={"Confirm Password"}
-            rules={[
-              {
-                required: true,
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error(
-                      "The two passwords that you entered do not match!"
-                    )
-                  );
-                },
-              }),
-            ]}
-            hasFeedback
-          >
-            <Input.Password
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              size="large"
-            />
-          </Form.Item>
-        </>
-      )}
+          }),
+        ]}
+        hasFeedback
+      >
+        <Input.Password
+          prefix={<LockOutlined className="site-form-item-icon" />}
+          size="large"
+        />
+      </Form.Item>
     </div>
   );
 };

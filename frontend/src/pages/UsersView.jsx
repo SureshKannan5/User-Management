@@ -3,17 +3,25 @@ import { Content } from "antd/es/layout/layout";
 import { Button, Typography } from "antd";
 import { UserAddOutlined } from "@ant-design/icons";
 import CustomOffCanVas from "../app/components/CustomOffCanVas";
-import { useState } from "react";
-import { useListAllUsersQuery } from "../redux/services/userApi";
+import { useEffect, useState } from "react";
+import {
+  useLazyGetUserProfileQuery,
+  useLazyListAllUsersQuery,
+} from "../redux/services/userApi";
+import { useSelector } from "react-redux";
 
 const { Title } = Typography;
 
 const UsersView = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [selectedRow, setSelectedRow] = useState({});
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const [action, setAction] = useState("create");
+
+  const {
+    userInfo: { role, id },
+  } = useSelector((state) => state.auth);
 
   const showDrawer = () => {
     setAction("create");
@@ -23,7 +31,24 @@ const UsersView = () => {
     setIsOpen(false);
   };
 
-  const { data: allUsers } = useListAllUsersQuery({});
+  const [getAllUsersQuery, { data: allUsers }] = useLazyListAllUsersQuery();
+
+  const [getCurrentUserProfile, { data }] = useLazyGetUserProfileQuery();
+
+  const isAdminView = role === "admin";
+
+  useEffect(() => {
+    console.log(selectedRow);
+    if (selectedRow === null) {
+      if (role !== "") {
+        if (isAdminView) {
+          getAllUsersQuery();
+        } else if (role === "user") {
+          getCurrentUserProfile();
+        }
+      }
+    }
+  }, [role, selectedRow]);
 
   const columns = [
     {
@@ -45,19 +70,22 @@ const UsersView = () => {
     {
       title: "Organization",
       // dataIndex: "organization.name",
-      render: (cell) => cell.organization.name,
-      key: "organization.name",
+      render: (cell) =>
+        isAdminView ? cell?.organization?.name : cell?.organization,
+
+      key: "organization",
     },
     {
       title: "User Role",
-      render: (cell) => cell.role.name,
-      key: "role.name",
+      render: (cell) => (isAdminView ? cell?.role?.name : cell?.role),
+      key: "role",
     },
   ];
 
   const onEditRow = (record) => {
     setAction("update");
-    setSelectedRow(() => record._id);
+    console.log(record);
+    setSelectedRow(() => record);
     setIsOpen(true);
   };
 
@@ -71,9 +99,10 @@ const UsersView = () => {
           title={action === "create" ? "Create a new user" : "Update user"}
           isOpen={isOpen}
           onClose={onCloseDrawer}
-          selectedRowId={selectedRow}
+          selectedRow={selectedRow}
           setSelectedRow={setSelectedRow}
           action={action}
+          // setLoadPage={setLoadPage}
         />
       )}
       <div className="home_page_container">
@@ -89,21 +118,26 @@ const UsersView = () => {
           <div className="table-header">
             {" "}
             <Title level={4}>User Details</Title>
-            <div className="action_container">
-              <Button
-                type="primary"
-                icon={<UserAddOutlined />}
-                onClick={() => showDrawer("Create a new user")}
-              >
-                Add User
-              </Button>
-            </div>
+            {isAdminView && (
+              <div className="action_container">
+                <Button
+                  type="primary"
+                  icon={<UserAddOutlined />}
+                  onClick={() => showDrawer("Create a new user")}
+                >
+                  Add User
+                </Button>
+              </div>
+            )}
           </div>
 
           <DataTable
             columns={columns}
-            dataSource={allUsers}
-            actions={{ onEdit: onEditRow, onDelete: onDeletedRow }}
+            dataSource={isAdminView ? allUsers : [data]}
+            actions={{
+              onEdit: onEditRow,
+              onDelete: isAdminView && onDeletedRow,
+            }}
           />
         </Content>
       </div>

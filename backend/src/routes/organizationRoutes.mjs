@@ -30,9 +30,11 @@ organizationRoutes.route("/listMetaOrganizations").get(fetchOrganizationMeta);
 
 organizationRoutes
   .route("/listAllOrganizations")
-  .get(authenticateJWT, authorizeAdmin, async (req, res) => {
+  .post(authenticateJWT, authorizeAdmin, async (req, res) => {
     try {
-      const organizations = await fetchAllOrganization();
+      const { body } = req;
+
+      const organizations = await fetchAllOrganization(body);
       return res.json(organizations);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
