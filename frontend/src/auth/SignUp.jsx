@@ -3,12 +3,46 @@ import SideContainer from "../layout/AuthLayout/SideContent";
 import { Layout, Col, Divider, Typography, Button } from "antd";
 import { Form } from "antd";
 import UserForm from "../app/components/UserForm";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  useListRolesQuery,
+  useRegisterUserMutation,
+} from "../redux/services/adminApi";
+import { isEmpty } from "lodash";
+import { pageNotifications } from "../app/util/helpers";
 
 const { Content } = Layout;
 const { Title } = Typography;
 
-const SignIn = () => {
+const SignUp = () => {
+  const [form] = Form.useForm();
+
+  const [registerUser] = useRegisterUserMutation({});
+
+  const { data } = useListRolesQuery({});
+
+  const navigate = useNavigate();
+
+  const onSubmit = async (values) => {
+    const adminObject =
+      !isEmpty(data) && data.find((role) => role.name === "admin");
+    try {
+      const payload = {
+        ...values,
+        role: adminObject._id,
+      };
+
+      const response = await registerUser(payload).unwrap();
+
+      if (response.message === "user create successfully") {
+        form.resetFields();
+        pageNotifications.success("Account created. please login");
+        navigate("/login");
+      }
+    } catch (error) {
+      pageNotifications.error(error.data);
+    }
+  };
   return (
     <AuthLayout sideContent={<SideContainer />}>
       <Content
@@ -31,7 +65,7 @@ const SignIn = () => {
           initialValues={{
             remember: true,
           }}
-          // onFinish={onFinish}
+          onFinish={onSubmit}
         >
           <UserForm />
           <Form.Item>
@@ -54,4 +88,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

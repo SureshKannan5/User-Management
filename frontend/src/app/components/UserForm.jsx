@@ -1,13 +1,22 @@
 import { Form, Input } from "antd";
 import CustomSelect from "./CustomSelect";
 import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
+import { useListOrganizationQuery } from "../../redux/services/adminApi";
 
 const UserForm = () => {
+  const { data } = useListOrganizationQuery({});
+
+  const [form] = Form.useForm();
+
+  const onSelectChange = (value) => {
+    form.setFieldValue(value);
+  };
+
   return (
     <div>
       <Form.Item
         label={"First Name"}
-        name="name"
+        name="firstName"
         rules={[
           {
             required: true,
@@ -21,7 +30,7 @@ const UserForm = () => {
       </Form.Item>
       <Form.Item
         label={"Last Name"}
-        name="surname"
+        name="lastName"
         rules={[
           {
             required: true,
@@ -59,11 +68,15 @@ const UserForm = () => {
           },
         ]}
       >
-        <CustomSelect />
+        <CustomSelect
+          options={data}
+          placeholder="Select organization"
+          onChange={onSelectChange}
+        />
       </Form.Item>
       <Form.Item
-        name="Password"
-        label={"password"}
+        name="password"
+        label="Password"
         rules={[
           {
             required: true,
@@ -76,8 +89,8 @@ const UserForm = () => {
         />
       </Form.Item>
       <Form.Item
-        name="Confirm password"
-        label={"confirmPassword"}
+        name="conform password"
+        label={"Confirm Password"}
         rules={[
           {
             required: true,

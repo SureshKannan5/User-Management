@@ -1,35 +1,21 @@
 import { Select } from "antd";
-const onChange = (value) => {
-  console.log(`selected ${value}`);
-};
+
 const onSearch = (value) => {
   console.log("search:", value);
 };
 
 const filterOption = (input, option) =>
   (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
-const CustomSelect = () => (
+
+const CustomSelect = ({ options, placeholder, onChange }) => (
   <Select
     showSearch
-    placeholder="Select a person"
+    placeholder={placeholder}
     optionFilterProp="children"
     onChange={onChange}
     onSearch={onSearch}
     filterOption={filterOption}
-    options={[
-      {
-        value: "jack",
-        label: "Jack",
-      },
-      {
-        value: "lucy",
-        label: "Lucy",
-      },
-      {
-        value: "tom",
-        label: "Tom",
-      },
-    ]}
+    options={options}
   />
 );
 export default CustomSelect;

@@ -24,14 +24,8 @@ const createUser = asyncHandler(async (req, res) => {
     await userInstance.save();
 
     const roleInstance = await Role.findById(role);
-    const token = generateToken({
-      sub: userInstance._id,
-      userName: userInstance.fullName,
-      role: roleInstance.name,
-      access: roleInstance.privileges,
-    });
 
-    res.status(201).json({ token });
+    res.status(201).json({ message: "user create successfully" });
   } catch (error) {
     res.status(404).json({ message: "Invalid User Data" });
   }

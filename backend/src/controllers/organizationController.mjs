@@ -1,5 +1,6 @@
 import asyncHandler from "../middlewares/asyncHandlers.mjs";
 import Organization from "../models/organizationModel.mjs";
+import Role from "../models/roleSchema.mjs";
 import User from "../models/userModel.mjs";
 
 const createOrganization = asyncHandler(async (req, res) => {
@@ -86,6 +87,16 @@ const getAllData = asyncHandler(async (req, res) => {
   }
 });
 
+const fetchAllRoles = asyncHandler(async (req, res) => {
+  try {
+    const Roles = await Role.find().select(["name", "_id"]);
+
+    res.json(Roles);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 const fetchAllOrganization = async (req, res) => {
   try {
     const organizations = await Organization.aggregate([
@@ -121,4 +132,5 @@ export {
   deleteOrganizationById,
   getAllData,
   fetchAllOrganization,
+  fetchAllRoles,
 };
