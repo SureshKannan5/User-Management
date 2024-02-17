@@ -7,7 +7,7 @@ const onSearch = (value) => {
 const filterOption = (input, option) =>
   (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
-const CustomSelect = ({ options, placeholder, onChange }) => (
+const CustomSelect = ({ options, placeholder, onChange, value }) => (
   <Select
     showSearch
     placeholder={placeholder}
@@ -16,6 +16,7 @@ const CustomSelect = ({ options, placeholder, onChange }) => (
     onSearch={onSearch}
     filterOption={filterOption}
     options={options}
+    value={value}
   />
 );
 export default CustomSelect;

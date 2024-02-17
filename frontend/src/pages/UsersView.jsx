@@ -1,17 +1,17 @@
 import DataTable from "../app/components/DataTable";
 import { Content } from "antd/es/layout/layout";
 import { Button, Typography } from "antd";
-import { ShopOutlined } from "@ant-design/icons";
+import { UserAddOutlined } from "@ant-design/icons";
 import CustomOffCanVas from "../app/components/CustomOffCanVas";
 import { useState } from "react";
-import { useListOrganizationQuery } from "../redux/services/adminApi";
+import { useListAllUsersQuery } from "../redux/services/userApi";
 
 const { Title } = Typography;
 
-const HomePage = () => {
+const UsersView = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRow, setSelectedRow] = useState({});
 
   const [action, setAction] = useState("create");
 
@@ -23,34 +23,35 @@ const HomePage = () => {
     setIsOpen(false);
   };
 
-  const { data: listOrganizations } = useListOrganizationQuery({});
+  const { data: allUsers } = useListAllUsersQuery({});
 
   const columns = [
     {
-      title: "Comapany",
-      dataIndex: "name",
-      key: "name",
+      title: "First Name",
+      dataIndex: "firstName",
+      key: "firstName",
     },
 
     {
-      title: "Email",
+      title: "Last Name",
+      dataIndex: "lastName",
+      key: "lastName",
+    },
+    {
+      title: "email",
       dataIndex: "email",
       key: "email",
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "Description",
+      title: "Organization",
+      // dataIndex: "organization.name",
+      render: (cell) => cell.organization.name,
+      key: "organization.name",
     },
     {
-      title: "Website",
-      dataIndex: "website",
-      key: "website",
-    },
-    {
-      title: "User count",
-      dataIndex: "userCount",
-      key: "userCount",
+      title: "User Role",
+      render: (cell) => cell.role.name,
+      key: "role.name",
     },
   ];
 
@@ -63,20 +64,16 @@ const HomePage = () => {
   const onDeletedRow = (record) => {
     setSelectedRow(() => record);
   };
-
   return (
     <>
       {isOpen && (
         <CustomOffCanVas
-          title={
-            action === "create"
-              ? "Create a new Organization"
-              : "Update Organization"
-          }
+          title={action === "create" ? "Create a new user" : "Update user"}
           isOpen={isOpen}
           onClose={onCloseDrawer}
           selectedRowId={selectedRow}
           setSelectedRow={setSelectedRow}
+          action={action}
         />
       )}
       <div className="home_page_container">
@@ -86,26 +83,26 @@ const HomePage = () => {
             margin: "30px auto",
             width: "100%",
             maxWidth: "100%",
-            flex: "none",
+            // flex: "none",
           }}
         >
           <div className="table-header">
             {" "}
-            <Title level={4}>Organization Details</Title>
+            <Title level={4}>User Details</Title>
             <div className="action_container">
               <Button
                 type="primary"
-                icon={<ShopOutlined />}
-                onClick={showDrawer}
+                icon={<UserAddOutlined />}
+                onClick={() => showDrawer("Create a new user")}
               >
-                Add Organization
+                Add User
               </Button>
             </div>
           </div>
 
           <DataTable
             columns={columns}
-            dataSource={listOrganizations}
+            dataSource={allUsers}
             actions={{ onEdit: onEditRow, onDelete: onDeletedRow }}
           />
         </Content>
@@ -114,4 +111,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default UsersView;

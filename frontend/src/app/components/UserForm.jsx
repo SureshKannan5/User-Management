@@ -3,7 +3,7 @@ import CustomSelect from "./CustomSelect";
 import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useListMetaOrganizationsQuery } from "../../redux/services/userApi";
 
-const UserForm = () => {
+const UserForm = ({ roleOptions, action }) => {
   const { data } = useListMetaOrganizationsQuery({});
 
   const [form] = Form.useForm();
@@ -74,45 +74,68 @@ const UserForm = () => {
           onChange={onSelectChange}
         />
       </Form.Item>
-      <Form.Item
-        name="password"
-        label="Password"
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-      >
-        <Input.Password
-          prefix={<LockOutlined className="site-form-item-icon" />}
-          size="large"
-        />
-      </Form.Item>
-      <Form.Item
-        name="conform password"
-        label={"Confirm Password"}
-        rules={[
-          {
-            required: true,
-          },
-          ({ getFieldValue }) => ({
-            validator(_, value) {
-              if (!value || getFieldValue("password") === value) {
-                return Promise.resolve();
-              }
-              return Promise.reject(
-                new Error("The two passwords that you entered do not match!")
-              );
+      {roleOptions && (
+        <Form.Item
+          label="Role"
+          name={"role"}
+          rules={[
+            {
+              required: true,
             },
-          }),
-        ]}
-        hasFeedback
-      >
-        <Input.Password
-          prefix={<LockOutlined className="site-form-item-icon" />}
-          size="large"
-        />
-      </Form.Item>
+          ]}
+        >
+          <CustomSelect
+            options={roleOptions}
+            placeholder="Select organization"
+            onChange={onSelectChange}
+          />
+        </Form.Item>
+      )}
+      {action !== "update" && (
+        <>
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item
+            name="conform password"
+            label={"Confirm Password"}
+            rules={[
+              {
+                required: true,
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "The two passwords that you entered do not match!"
+                    )
+                  );
+                },
+              }),
+            ]}
+            hasFeedback
+          >
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              size="large"
+            />
+          </Form.Item>
+        </>
+      )}
     </div>
   );
 };

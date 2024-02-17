@@ -18,6 +18,9 @@ export const adminApi = api.injectEndpoints({
         body: payload,
       }),
     }),
+    getOrgnizationById: build.query({
+      query: (id) => `${MODULE_BASE_URL}/${id}`,
+    }),
     listOrganization: build.query({
       query: () => `${MODULE_BASE_URL}/listAllOrganizations`,
     }),
@@ -26,6 +29,32 @@ export const adminApi = api.injectEndpoints({
     }),
     listAllData: build.query({
       query: () => `${MODULE_BASE_URL}/getAllData`,
+    }),
+    updateOrganizationById: build.mutation({
+      query: ({ payload, id }) => ({
+        url: `${MODULE_BASE_URL}/${id}`,
+        method: "PUT",
+        body: payload,
+      }),
+    }),
+    updateUserById: build.mutation({
+      query: ({ payload, id }) => ({
+        url: `api/v1/user/${id}`,
+        method: "PUT",
+        body: payload,
+      }),
+    }),
+    deleteOrganizationById: build.mutation({
+      query: (id) => ({
+        url: `${MODULE_BASE_URL}/${id}`,
+        method: "DELETE",
+      }),
+    }),
+    deleteUserById: build.mutation({
+      query: (id) => ({
+        url: `api/v1/user/${id}`,
+        method: "DELETE",
+      }),
     }),
   }),
   overrideExisting: true,
@@ -37,4 +66,9 @@ export const {
   useListRolesQuery,
   useListAllDataQuery,
   useCreateOrganizationMutation,
+  useLazyGetOrgnizationByIdQuery,
+  useUpdateOrganizationByIdMutation,
+  useUpdateUserByIdMutation,
+  useDeleteOrganizationByIdMutation,
+  useDeleteUserByIdMutation,
 } = adminApi;

@@ -179,6 +179,16 @@ const updateUserById = asyncHandler(async (req, res) => {
   }
 });
 
+const listUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find().populate(["role", "organization"]);
+
+    res.json(users);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 export {
   createUser,
   loginUser,
@@ -187,4 +197,5 @@ export {
   getUserById,
   updateUserById,
   deleteUserById,
+  listUsers,
 };

@@ -1,21 +1,121 @@
 import { Button, Drawer, Form, Input, Space } from "antd";
 import UserForm from "./UserForm";
-import { useCreateOrganizationMutation } from "../../redux/services/adminApi";
-import { pageNotifications } from "../util/helpers";
+import {
+  useCreateOrganizationMutation,
+  useLazyGetOrgnizationByIdQuery,
+  useListRolesQuery,
+  useRegisterUserMutation,
+  useUpdateOrganizationByIdMutation,
+  useUpdateUserByIdMutation,
+} from "../../redux/services/adminApi";
+import { labelFormatter, pageNotifications } from "../util/helpers";
+import { isEmpty } from "lodash";
+import { useEffect } from "react";
+import { useLazyGetUserByIdQuery } from "../../redux/services/userApi";
 
-const CustomOffCanVas = ({ isOpen, title, onClose }) => {
+const CustomOffCanVas = ({
+  isOpen,
+  title,
+  onClose,
+  selectedRowId,
+  action,
+  setSelectedRow,
+}) => {
   const [createOrganization] = useCreateOrganizationMutation();
+
+  const [getOrganizationInfo] = useLazyGetOrgnizationByIdQuery();
+
+  const [getUserInfo] = useLazyGetUserByIdQuery();
+
+  const [createUser] = useRegisterUserMutation();
+
+  const [updateUserInfo] = useUpdateUserByIdMutation();
+
+  const [updateOrganizationInfo] = useUpdateOrganizationByIdMutation();
 
   const [form] = Form.useForm();
 
-  const onSubmit = async (values) => {
-    console.log(values);
-    try {
-      await createOrganization(values).unwrap();
+  const { data } = useListRolesQuery();
 
-      pageNotifications.success("Organization created sucessfully");
+  const roleOptions = labelFormatter(data, "name", "_id");
+
+  const isOrganizationAction = title.includes("Organization");
+
+  const onCloseDrawer = () => {
+    form.resetFields();
+    setSelectedRow(null);
+
+    onClose();
+  };
+
+  useEffect(() => {
+    async function getDataById() {
+      if (selectedRowId) {
+        try {
+          if (isOrganizationAction) {
+            const result = await getOrganizationInfo(selectedRowId).unwrap();
+            form.setFieldsValue(result);
+          } else {
+            const result = await getUserInfo(selectedRowId).unwrap();
+            form.setFieldsValue(result);
+            form.setFieldValue("organization", result.organization._id);
+            form.setFieldValue("role", result.role._id);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+
+    getDataById();
+  }, [selectedRowId]);
+
+  const onSubmit = async (values) => {
+    const adminObject =
+      !isEmpty(data) && data.find((role) => role.name === "admin");
+    try {
+      if (action === "create") {
+        if (isOrganizationAction) await createOrganization(values).unwrap();
+        else {
+          await createUser({ ...values, role: adminObject._id }).unwrap();
+        }
+
+        pageNotifications.success(
+          `${
+            isOrganizationAction ? "organization" : "user"
+          } created sucessfully`
+        );
+        return;
+      }
+
+      onUpdateInfo(values);
 
       form.resetFields();
+      onClose();
+    } catch (error) {
+      pageNotifications.error(error.data);
+      console.log(error);
+    }
+  };
+
+  const onUpdateInfo = async (values) => {
+    try {
+      console.log(selectedRowId, values);
+      if (isOrganizationAction)
+        await updateOrganizationInfo({
+          payload: values,
+          id: selectedRowId,
+        }).unwrap();
+      else {
+        await updateUserInfo({
+          payload: values,
+          id: selectedRowId,
+        }).unwrap();
+      }
+
+      pageNotifications.success(
+        `${isOrganizationAction ? "organization" : "user"} updated sucessfully`
+      );
     } catch (error) {
       pageNotifications.error(error.data);
       console.log(error);
@@ -25,7 +125,7 @@ const CustomOffCanVas = ({ isOpen, title, onClose }) => {
   return (
     <Drawer
       title={title}
-      onClose={onClose}
+      onClose={onCloseDrawer}
       open={isOpen}
       styles={{
         body: {
@@ -33,8 +133,15 @@ const CustomOffCanVas = ({ isOpen, title, onClose }) => {
         },
       }}
     >
-      <Form layout="vertical" onFinish={onSubmit}>
-        {title === "Create a new Organization" ? (
+      <Form
+        layout="vertical"
+        onFinish={onSubmit}
+        initialValues={{
+          remember: true,
+        }}
+        form={form}
+      >
+        {isOrganizationAction ? (
           <>
             <Form.Item
               name="name"
@@ -97,7 +204,7 @@ const CustomOffCanVas = ({ isOpen, title, onClose }) => {
             </Form.Item>
           </>
         ) : (
-          <UserForm />
+          <UserForm roleOptions={roleOptions} action={action} />
         )}
 
         <Space>

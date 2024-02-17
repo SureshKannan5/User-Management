@@ -7,6 +7,7 @@ import {
   getUserById,
   deleteUserById,
   updateUserById,
+  listUsers,
 } from "../controllers/userController.mjs";
 import { commonFieldValidator } from "../Validator/validation.mjs";
 import {
@@ -34,6 +35,10 @@ userRoutes
   .put(authenticateJWT, updateCurrentUserProfile);
 
 // ADMIN ROUTES
+
+userRoutes
+  .route("/listAllUsers")
+  .get(authenticateJWT, authorizeAdmin, listUsers);
 
 userRoutes
   .route("/:id")

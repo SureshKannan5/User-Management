@@ -14,7 +14,7 @@ const items = [
   {
     key: "users",
     icon: <UserAddOutlined />,
-    label: <Link to={"/users"}>Users</Link>,
+    label: <Link to={"/users-view"}>Users</Link>,
   },
 ];
 const SideBar = () => {

@@ -9,6 +9,8 @@ const HomePage = lazy(() => import("../pages/HomePage"));
 
 const RegisterAdmin = lazy(() => import("../auth/SignUp"));
 
+const UsersView = lazy(() => import("../pages/UsersView"));
+
 export const publicRoutes = [
   {
     path: "/register",
@@ -23,7 +25,9 @@ export const publicRoutes = [
 export const authProtectedRoutes = [
   {
     path: "*",
-    component: <Navigate to="/dashboards" />,
+    component: <Navigate to="/organizations" />,
   },
   { path: "/", component: <HomePage /> },
+  { path: "/organizations", component: <HomePage /> },
+  { path: "/users-view", component: <UsersView /> },
 ];
