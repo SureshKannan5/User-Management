@@ -1,10 +1,10 @@
 import { Form, Input } from "antd";
 import CustomSelect from "./CustomSelect";
 import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
-import { useListOrganizationQuery } from "../../redux/services/adminApi";
+import { useListMetaOrganizationsQuery } from "../../redux/services/userApi";
 
 const UserForm = () => {
-  const { data } = useListOrganizationQuery({});
+  const { data } = useListMetaOrganizationsQuery({});
 
   const [form] = Form.useForm();
 

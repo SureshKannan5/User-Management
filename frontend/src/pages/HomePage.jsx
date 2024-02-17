@@ -4,6 +4,7 @@ import { Button, Typography, Space } from "antd";
 import { UserAddOutlined, ShopOutlined } from "@ant-design/icons";
 import CustomOffCanVas from "../app/components/CustomOffCanVas";
 import { useState } from "react";
+import { useListOrganizationQuery } from "../redux/services/adminApi";
 
 const { Title } = Typography;
 
@@ -19,6 +20,34 @@ const HomePage = () => {
   const onCloseDrawer = () => {
     setIsOpen(false);
   };
+
+  const { data: listOrganizations } = useListOrganizationQuery({});
+
+  const columns = [
+    {
+      title: "Comapany",
+      dataIndex: "name",
+      key: "name",
+    },
+
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "Description",
+    },
+    {
+      title: "Website",
+      dataIndex: "website",
+      key: "website",
+    },
+  ];
+
+  console.log("data", listOrganizations);
 
   return (
     <>
@@ -40,6 +69,7 @@ const HomePage = () => {
           }}
         >
           <div className="table-header">
+            {" "}
             <Title level={4}>Organization Details</Title>
             <div className="action_container">
               <Space>
@@ -62,7 +92,7 @@ const HomePage = () => {
             </div>
           </div>
 
-          <DataTable />
+          <DataTable columns={columns} dataSource={listOrganizations} />
         </Content>
       </div>
     </>

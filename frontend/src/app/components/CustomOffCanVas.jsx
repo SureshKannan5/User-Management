@@ -1,11 +1,30 @@
 import { Button, Drawer, Form, Input, Space } from "antd";
 import UserForm from "./UserForm";
+import { useCreateOrganizationMutation } from "../../redux/services/adminApi";
+import { pageNotifications } from "../util/helpers";
 
 const CustomOffCanVas = ({ isOpen, title, onClose }) => {
+  const [createOrganization] = useCreateOrganizationMutation();
+
+  const [form] = Form.useForm();
+
+  const onSubmit = async (values) => {
+    console.log(values);
+    try {
+      await createOrganization(values).unwrap();
+
+      pageNotifications.success("Organization created sucessfully");
+
+      form.resetFields();
+    } catch (error) {
+      pageNotifications.error(error.data);
+      console.log(error);
+    }
+  };
+
   return (
     <Drawer
       title={title}
-      // width={720}
       onClose={onClose}
       open={isOpen}
       styles={{
@@ -14,11 +33,11 @@ const CustomOffCanVas = ({ isOpen, title, onClose }) => {
         },
       }}
     >
-      <Form layout="vertical">
+      <Form layout="vertical" onFinish={onSubmit}>
         {title === "Create a new Organization" ? (
           <>
             <Form.Item
-              name="company"
+              name="name"
               label="Company Name"
               rules={[
                 {
@@ -57,8 +76,6 @@ const CustomOffCanVas = ({ isOpen, title, onClose }) => {
                 style={{
                   width: "100%",
                 }}
-                addonBefore="http://"
-                addonAfter=".com"
                 placeholder="Please enter url"
               />
             </Form.Item>
@@ -85,7 +102,7 @@ const CustomOffCanVas = ({ isOpen, title, onClose }) => {
 
         <Space>
           <Button onClick={onClose}>Cancel</Button>
-          <Button onClick={onClose} type="primary">
+          <Button type="primary" htmlType="submit">
             Submit
           </Button>
         </Space>

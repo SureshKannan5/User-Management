@@ -12,6 +12,7 @@ import {
   deleteOrganizationById,
   fetchAllOrganization,
   fetchAllRoles,
+  fetchOrganizationMeta,
   getAllData,
   getOrganizationById,
   updateOrganizationById,
@@ -25,14 +26,18 @@ organizationRoutes
   .route("/getAllData")
   .get(authenticateJWT, authorizeAdmin, getAllData);
 
-organizationRoutes.route("/listAllOrganizations").get(async (req, res) => {
-  try {
-    const organizations = await fetchAllOrganization();
-    return res.json(organizations);
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+organizationRoutes.route("/listMetaOrganizations").get(fetchOrganizationMeta);
+
+organizationRoutes
+  .route("/listAllOrganizations")
+  .get(authenticateJWT, authorizeAdmin, async (req, res) => {
+    try {
+      const organizations = await fetchAllOrganization();
+      return res.json(organizations);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
 organizationRoutes
   .route("/create")

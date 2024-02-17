@@ -16,7 +16,7 @@ passport.use(
       ]);
 
       if (!user) {
-        return done("Invalid token", false);
+        return done({ message: "Invalid token", status: 403 }, false);
       }
 
       return done(null, user);

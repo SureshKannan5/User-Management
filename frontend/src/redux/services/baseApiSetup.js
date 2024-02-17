@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { logOut } from "../slices/authSlice";
+import { labelFormatter } from "../../app/util/helpers";
 
 const API_URL = import.meta.env.VITE_BACKEND_SERVER || "http://localhost:8080";
 
@@ -20,7 +21,9 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  if (result?.error?.status === 403) {
+  console.log(result);
+
+  if (result?.error?.originalStatus === 403) {
     // logout
     api.dispatch(logOut());
     window.location.href = "/login";

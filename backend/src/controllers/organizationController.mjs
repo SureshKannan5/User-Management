@@ -97,6 +97,15 @@ const fetchAllRoles = asyncHandler(async (req, res) => {
   }
 });
 
+const fetchOrganizationMeta = asyncHandler(async (req, res) => {
+  try {
+    const Roles = await Organization.find().select(["name", "_id"]);
+    res.json(Roles);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 const fetchAllOrganization = async (req, res) => {
   try {
     const organizations = await Organization.aggregate([
@@ -133,4 +142,5 @@ export {
   getAllData,
   fetchAllOrganization,
   fetchAllRoles,
+  fetchOrganizationMeta,
 };
