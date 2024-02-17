@@ -6,7 +6,6 @@ import {
   DeleteOutlined,
   EllipsisOutlined,
 } from "@ant-design/icons";
-import { useSelector } from "react-redux";
 
 const DataTable = ({ columns, dataSource, actions }) => {
   const items = [
@@ -33,8 +32,6 @@ const DataTable = ({ columns, dataSource, actions }) => {
       return [items[0]];
     }
   }, [actions]);
-
-  console.log("con", convertedItems);
 
   const convertedColumns = useMemo(
     () => [

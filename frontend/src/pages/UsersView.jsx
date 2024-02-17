@@ -5,10 +5,13 @@ import { UserAddOutlined } from "@ant-design/icons";
 import CustomOffCanVas from "../app/components/CustomOffCanVas";
 import { useEffect, useState } from "react";
 import {
+  useDeleteUserByIdMutation,
   useLazyGetUserProfileQuery,
   useLazyListAllUsersQuery,
 } from "../redux/services/userApi";
 import { useSelector } from "react-redux";
+import DeleteModal from "../app/components/DeleteModal";
+import { pageNotifications } from "../app/util/helpers";
 
 const { Title } = Typography;
 
@@ -19,8 +22,12 @@ const UsersView = () => {
 
   const [action, setAction] = useState("create");
 
+  const [loadPage, setLoadPage] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+
   const {
-    userInfo: { role, id },
+    userInfo: { role },
   } = useSelector((state) => state.auth);
 
   const showDrawer = () => {
@@ -35,20 +42,19 @@ const UsersView = () => {
 
   const [getCurrentUserProfile, { data }] = useLazyGetUserProfileQuery();
 
+  const [deleteUser] = useDeleteUserByIdMutation();
+
   const isAdminView = role === "admin";
 
   useEffect(() => {
-    console.log(selectedRow);
-    if (selectedRow === null) {
-      if (role !== "") {
-        if (isAdminView) {
-          getAllUsersQuery();
-        } else if (role === "user") {
-          getCurrentUserProfile();
-        }
+    if (role !== "") {
+      if (isAdminView) {
+        getAllUsersQuery();
+      } else if (role === "user") {
+        getCurrentUserProfile();
       }
     }
-  }, [role, selectedRow]);
+  }, [role, loadPage, isAdminView, getAllUsersQuery, getCurrentUserProfile]);
 
   const columns = [
     {
@@ -91,6 +97,24 @@ const UsersView = () => {
 
   const onDeletedRow = (record) => {
     setSelectedRow(() => record);
+    setModalOpen(true);
+  };
+
+  const hideModal = () => setModalOpen(() => false);
+
+  const handleDelete = async () => {
+    try {
+      await deleteUser(selectedRow._id).unwrap();
+
+      pageNotifications.success("User deleted sucessfully");
+      setLoadPage((state) => !state);
+    } catch (error) {
+      console.log(error.data.message);
+      pageNotifications.error(error.data.message);
+    } finally {
+      setModalOpen(() => false);
+      setSelectedRow(() => null);
+    }
   };
   return (
     <>
@@ -102,9 +126,16 @@ const UsersView = () => {
           selectedRow={selectedRow}
           setSelectedRow={setSelectedRow}
           action={action}
-          // setLoadPage={setLoadPage}
+          setLoadPage={setLoadPage}
         />
       )}
+
+      <DeleteModal
+        open={modalOpen}
+        content={"Are you sure you want delete user?"}
+        handleDelete={handleDelete}
+        hideModal={hideModal}
+      />
       <div className="home_page_container">
         <Content
           className="whiteBox shadow layoutPadding"

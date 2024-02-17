@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import "./assets/styles/app.scss";
 import PageLoader from "./app/components/PageLoader";
-// import { RouterProvider } from "react-router-dom";
-// import MainRouteDriver from "./routes";
 import Routes from "./routes/index";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";

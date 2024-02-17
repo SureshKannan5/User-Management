@@ -1,12 +1,17 @@
 import DataTable from "../app/components/DataTable";
 import { Content } from "antd/es/layout/layout";
-import { Button, Space, Typography } from "antd";
+import { Button, Typography } from "antd";
 import { ShopOutlined } from "@ant-design/icons";
 import CustomOffCanVas from "../app/components/CustomOffCanVas";
 import { useEffect, useState } from "react";
-import { useListOrganizationMutation } from "../redux/services/adminApi";
+import {
+  useDeleteOrganizationByIdMutation,
+  useListOrganizationMutation,
+} from "../redux/services/adminApi";
 import CustomSelect from "../app/components/CustomSelect";
 import { useListMetaOrganizationsQuery } from "../redux/services/userApi";
+import DeleteModal from "../app/components/DeleteModal";
+import { pageNotifications } from "../app/util/helpers";
 
 const { Title } = Typography;
 
@@ -16,6 +21,10 @@ const HomePage = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [action, setAction] = useState("create");
+
+  const [loadPage, setLoadPage] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   const showDrawer = () => {
     setAction("create");
@@ -29,11 +38,11 @@ const HomePage = () => {
 
   const { data: organizationOptions } = useListMetaOrganizationsQuery({});
 
-  console.log(data);
+  const [deleteOrganization] = useDeleteOrganizationByIdMutation();
 
   useEffect(() => {
     getFilteredOrganizations({ organization: [] });
-  }, []);
+  }, [loadPage, getFilteredOrganizations]);
 
   const columns = [
     {
@@ -66,20 +75,43 @@ const HomePage = () => {
 
   const onEditRow = (record) => {
     setAction("update");
-    setSelectedRow(() => record._id);
+    setSelectedRow(() => record);
     setIsOpen(true);
   };
 
   const onDeletedRow = (record) => {
     setSelectedRow(() => record);
+    setModalOpen(true);
   };
 
   const onSelectChange = (selectedValue) => {
     getFilteredOrganizations({ organization: selectedValue });
   };
 
+  const hideModal = () => setModalOpen(() => false);
+
+  const handleDelete = async () => {
+    try {
+      await deleteOrganization(selectedRow._id).unwrap();
+
+      pageNotifications.success("Organization deleted sucessfully");
+      setModalOpen(() => false);
+      setSelectedRow(() => null);
+      setLoadPage((state) => !state);
+    } catch (error) {
+      console.log(error);
+      pageNotifications.error("Delete action failed");
+    }
+  };
+
   return (
     <>
+      <DeleteModal
+        open={modalOpen}
+        content={"Are you sure you want delete organization"}
+        handleDelete={handleDelete}
+        hideModal={hideModal}
+      />
       {isOpen && (
         <CustomOffCanVas
           title={
@@ -88,9 +120,11 @@ const HomePage = () => {
               : "Update Organization"
           }
           isOpen={isOpen}
+          action={action}
           onClose={onCloseDrawer}
-          selectedRowId={selectedRow}
+          selectedRow={selectedRow}
           setSelectedRow={setSelectedRow}
+          setLoadPage={setLoadPage}
         />
       )}
       <div className="home_page_container">

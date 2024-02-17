@@ -52,10 +52,11 @@ const CustomOffCanVas = ({
   const onCloseDrawer = () => {
     form.resetFields();
     setSelectedRow(() => null);
+    setLoadPage((state) => !state);
     onClose();
   };
 
-  console.log("select", selectedRow);
+  console.log("select", action);
 
   useEffect(() => {
     async function getDataById() {
@@ -97,10 +98,10 @@ const CustomOffCanVas = ({
             isOrganizationAction ? "organization" : "user"
           } created sucessfully`
         );
-        return;
+      } else {
+        onUpdateInfo(values);
       }
 
-      onUpdateInfo(values);
       onCloseDrawer();
     } catch (error) {
       pageNotifications.error(error.data);

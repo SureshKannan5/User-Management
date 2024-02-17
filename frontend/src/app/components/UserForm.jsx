@@ -93,7 +93,7 @@ const UserForm = ({ roleOptions, action }) => {
             >
               <CustomSelect
                 options={roleOptions}
-                placeholder="Select organization"
+                placeholder="Select role"
                 onChange={onSelectChange}
               />
             </Form.Item>
