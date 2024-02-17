@@ -7,14 +7,10 @@ const baseQuery = fetchBaseQuery({
   baseUrl: `${API_URL}`,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
-    const {
-      auth: { authState },
-    } = getState();
+    const { auth } = getState();
 
-    // console.log("token", auth);
-    if (authState.token) {
-      headers.set("Authorization", `Bearer ${authState.token}`);
-      headers.set("srcuserid", authState.user);
+    if (auth?.token) {
+      headers.set("Authorization", `Bearer ${auth.token}`);
       headers.set("authenticate", "true");
     }
     return headers;
@@ -37,7 +33,7 @@ export const api = createApi({
   endpoints: (build) => ({
     login: build.mutation({
       query: (credentials) => ({
-        url: "/api/v1/users/create",
+        url: "/api/v1/user/auth",
         method: "POST",
         body: credentials,
       }),

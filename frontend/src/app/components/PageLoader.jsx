@@ -1,14 +1,9 @@
-import Spinner from "react-bootstrap/Spinner";
+import { Spin } from "antd";
 
 const PageLoader = () => {
   return (
     <div className="centerAbsolute">
-      <Spinner
-        size="large"
-        animation="border"
-        role="status"
-        variant="primary"
-      />
+      <Spin size="large" />
     </div>
   );
 };

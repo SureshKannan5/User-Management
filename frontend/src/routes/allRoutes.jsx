@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 
 const Login = lazy(() => import("../auth/SignIn"));
 
-const Dashboards = lazy(() => import("../pages/Dashboard"));
+const HomePage = lazy(() => import("../pages/HomePage"));
 
 const RegisterAdmin = lazy(() => import("../auth/SignUp"));
 
@@ -25,9 +25,5 @@ export const authProtectedRoutes = [
     path: "*",
     component: <Navigate to="/dashboards" />,
   },
-  {
-    path: "/",
-    component: <Navigate to="/dashboards" />,
-  },
-  { path: "/dashboards", component: <Dashboards /> },
+  { path: "/", component: <HomePage /> },
 ];

@@ -5,6 +5,7 @@ import express from "express";
 import { BASE_API_URL } from "./src/util/constants.mjs";
 import passport from "./src/config/passportConfig.mjs";
 import origanizationRoutes from "./src/routes/organizationRoutes.mjs";
+import cors from "cors";
 
 dotenv.config();
 
@@ -13,6 +14,13 @@ const port = process.env.PORT | 8080;
 connectDB();
 
 const app = express();
+
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 

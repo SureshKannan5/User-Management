@@ -3,12 +3,41 @@ import SideContainer from "../layout/AuthLayout/SideContent";
 import { Layout, Col, Divider, Typography } from "antd";
 import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useLoginMutation } from "../redux/services/baseApiSetup";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserAuthToken, setUserInfo } from "../redux/slices/authSlice";
+import { generateUserInfo } from "../app/util/helpers";
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 const SignIn = () => {
+  const [login] = useLoginMutation();
+
+  const dispatch = useDispatch();
+
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const navigate = useNavigate();
+
+  const onSubmit = async (values) => {
+    try {
+      const { token } = await login(values).unwrap();
+
+      sessionStorage.setItem("auth-token", token);
+
+      const userInformation = generateUserInfo(token);
+
+      dispatch(setUserAuthToken({ token }));
+
+      dispatch(setUserInfo(userInfo, userInformation));
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <AuthLayout sideContent={<SideContainer />}>
       <Content
@@ -31,7 +60,7 @@ const SignIn = () => {
           initialValues={{
             remember: true,
           }}
-          // onFinish={onFinish}
+          onFinish={onSubmit}
         >
           <Form.Item
             label="Email"

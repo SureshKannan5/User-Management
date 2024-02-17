@@ -1,37 +1,46 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PageLoader from "../app/components/PageLoader";
-import { Navigate, useLocation } from "react-router-dom";
-import { selectCurrentToken, setCredentials } from "../redux/slices/authSlice";
+import { Navigate } from "react-router-dom";
+import {
+  selectCurrentToken,
+  setUserAuthToken,
+  setUserInfo,
+} from "../redux/slices/authSlice";
+import PageLayout from "../layout/PageLayout";
+import { generateUserInfo } from "../app/util/helpers";
 
 const PrivateRoute = () => {
   const [loading, setLoading] = React.useState(true);
   const token = useSelector(selectCurrentToken);
+
+  const { userInfo } = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
   const userToken = sessionStorage.getItem("auth-token");
-  const currentLoginUser = sessionStorage.getItem("currentSessionUser");
-  const location = useLocation();
 
   useEffect(() => {
-    if (token === "" && userToken) {
-      // reset state in navigating urls to aviod location state rendering;
-      location.state = null;
-      dispatch(
-        setCredentials({
-          user: currentLoginUser || "",
-          token: userToken || "",
-        })
-      );
+    try {
+      if (token === "" && userToken !== "") {
+        const userInformation = generateUserInfo(userToken);
+
+        dispatch(setUserAuthToken({ token: userToken }));
+
+        dispatch(setUserInfo(userInfo, { ...userInformation }));
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [location]);
+  }, []);
 
   return loading ? (
     <PageLoader />
   ) : userToken ? (
-    <div>page</div>
+    <PageLayout />
   ) : (
-    <Navigate to="/login" state={{ from: location }} replace />
+    <Navigate to="/login" />
   );
 };
 
