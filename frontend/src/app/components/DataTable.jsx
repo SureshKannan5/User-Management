@@ -7,7 +7,7 @@ import {
   EllipsisOutlined,
 } from "@ant-design/icons";
 
-const DataTable = ({ columns, dataSource, actions }) => {
+const DataTable = ({ columns, dataSource, actions, isLoading }) => {
   const items = [
     {
       label: "Edit",
@@ -77,6 +77,7 @@ const DataTable = ({ columns, dataSource, actions }) => {
       dataSource={dataSource}
       columns={convertedColumns}
       scroll={{ x: true }}
+      loading={isLoading}
     />
   );
 };

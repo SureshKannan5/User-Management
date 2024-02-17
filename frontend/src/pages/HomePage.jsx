@@ -34,7 +34,8 @@ const HomePage = () => {
     setIsOpen(false);
   };
 
-  const [getFilteredOrganizations, { data }] = useListOrganizationMutation();
+  const [getFilteredOrganizations, { data, isLoading }] =
+    useListOrganizationMutation();
 
   const { data: organizationOptions } = useListMetaOrganizationsQuery({});
 
@@ -165,6 +166,7 @@ const HomePage = () => {
           <DataTable
             columns={columns}
             dataSource={data || []}
+            isLoading={isLoading}
             actions={{ onEdit: onEditRow, onDelete: onDeletedRow }}
           />
         </Content>
